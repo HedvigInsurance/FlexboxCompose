@@ -4,6 +4,7 @@ plugins {
     id("com.android.library")
     kotlin("android")
     id("shot")
+    id("maven-publish") apply true
 }
 
 group = "com.hedvig.flexboxcompose"
@@ -81,4 +82,29 @@ dependencies {
 
 tasks.withType<KotlinCompile> {
     kotlinOptions.jvmTarget = "1.8"
+}
+
+configure<PublishingExtension> {
+    publications {
+        create<MavenPublication>("maven") {
+            groupId = "com.hedvig.flexboxcompose"
+            artifactId = "flexbox-compose"
+            version = "1.0.0"
+        }
+    }
+
+    repositories {
+        maven {
+            name = "GitHubPackages"
+            url = uri("https://maven.pkg.github.com/HedvigInsurance/FlexboxCompose")
+            credentials {
+                username = System.getenv("GPR_USER")
+                password = System.getenv("GPR_KEY")
+            }
+        }
+    }
+}
+
+tasks.named("publish") {
+    dependsOn("assemble")
 }
