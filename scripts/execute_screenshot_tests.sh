@@ -2,6 +2,8 @@
 
 set -e
 
+TERM=xterm
+
 YELLOW=`tput setaf 3`
 RED=`tput setaf 1`
 GREEN=`tput setaf 2`
