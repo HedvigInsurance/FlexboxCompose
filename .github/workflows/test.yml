@@ -16,22 +16,40 @@ jobs:
         with:
           distribution: 'corretto'
           java-version: 11
-      - name: Cache Gradle and wrapper
-        uses: actions/cache@v2
+      - name: Gradle cache
+        uses: gradle/gradle-build-action@v2
+
+      - name: AVD cache
+        uses: actions/cache@v3
+        id: avd-cache
         with:
           path: |
-            ~/.gradle/caches
-            ~/.gradle/wrapper
-          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*') }}
-          restore-keys: |
-            ${{ runner.os }}-gradle-
-      - name: Grant Permission for Gradlew to Execute
-        run: chmod +x gradlew
-      - name: Run tests
+            ~/.android/avd/*
+            ~/.android/adb*
+          key: avd-${{ matrix.api-level }}
+
+      - name: create AVD and generate snapshot for caching
+        if: steps.avd-cache.outputs.cache-hit != 'true'
         uses: reactivecircus/android-emulator-runner@v2
         with:
           api-level: 32
           target: google_apis
           arch: x86_64
           profile: Nexus 6
+          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
+          disable-animations: false
+          script: echo "Generated AVD snapshot for caching."
+
+      - name: Grant Permission for Gradlew to Execute
+        run: chmod +x gradlew
+
+      - name: Run tests
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 32
+          force-avd-creation: false
+          target: google_apis
+          arch: x86_64
+          profile: Nexus 6
+          disable-animations: true
           script: ./gradlew executeScreenshotTests
