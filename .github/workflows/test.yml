@@ -16,9 +16,6 @@ jobs:
         with:
           distribution: 'corretto'
           java-version: 11
-      - name: Setup Android SDK
-        uses: android-actions/setup-android@v2
-
       - name: Cache Gradle and wrapper
         uses: actions/cache@v2
         with:
