@@ -89,15 +89,17 @@ tasks.withType<KotlinCompile> {
 
 configure<PublishingExtension> {
     publications {
-        create<MavenPublication>("maven") {
-            groupId = "com.github.HedvigInsurance"
-            artifactId = "FlexboxCompose"
-            version = gitVersion()
-            artifact("$buildDir/outputs/aar/flexboxcompose-release.aar")
+        publishing {
+            create<MavenPublication>("release") {
+                groupId = "com.github.HedvigInsurance"
+                artifactId = "FlexboxCompose"
+                version = gitVersion()
+                artifact("$buildDir/outputs/aar/$artifactId-release.aar")
+            }
         }
     }
 }
 
-tasks.named("publishToMavenLocal") {
+tasks.withType<PublishToMavenLocal> {
     dependsOn("assemble")
 }
