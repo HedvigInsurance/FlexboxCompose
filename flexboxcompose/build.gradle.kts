@@ -10,7 +10,7 @@ plugins {
 
 val gitVersion: groovy.lang.Closure<String> by extra
 
-group = "com.hedvig.flexboxcompose"
+group = "com.github.HedvigInsurance"
 version = gitVersion()
 
 android {
