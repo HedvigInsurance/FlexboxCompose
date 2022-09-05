@@ -94,7 +94,7 @@ configure<PublishingExtension> {
                 groupId = "com.github.HedvigInsurance"
                 artifactId = "FlexboxCompose"
                 version = gitVersion()
-                artifact("$buildDir/outputs/aar/$artifactId-release.aar")
+                artifact("$buildDir/outputs/aar/flexboxcompose-release.aar")
             }
         }
     }
