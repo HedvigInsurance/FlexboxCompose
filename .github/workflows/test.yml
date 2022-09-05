@@ -33,5 +33,5 @@ jobs:
           api-level: 32
           target: google_apis
           arch: x86_64
-          profile: pixel_5
+          profile: Nexus 6
           script: ./gradlew executeScreenshotTests
