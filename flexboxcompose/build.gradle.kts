@@ -93,6 +93,7 @@ configure<PublishingExtension> {
             groupId = "com.hedvig.flexboxcompose"
             artifactId = "flexbox-compose"
             version = gitVersion()
+            artifact("$buildDir/outputs/aar/flexboxcompose-release.aar")
         }
     }
 
