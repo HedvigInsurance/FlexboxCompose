@@ -130,42 +130,42 @@ data class FlexStyle(
 fun FlexStyle.applyTo(node: YogaNode) {
     when (size.width.kind) {
         FlexSizeKind.PERCENT -> size.width.amount?.let { node.setWidthPercent(it) }
-        FlexSizeKind.CONSTANT -> size.width.amount?.let { node.setWidth(it) }
+        FlexSizeKind.CONSTANT -> size.width.dpAmount()?.let { node.setWidth(it) }
         FlexSizeKind.AUTO -> node.setWidthAuto()
         FlexSizeKind.UNDEFINED -> {}
     }
 
     when (size.height.kind) {
         FlexSizeKind.PERCENT -> size.height.amount?.let { node.setHeightPercent(it) }
-        FlexSizeKind.CONSTANT -> size.height.amount?.let { node.setHeight(it) }
+        FlexSizeKind.CONSTANT -> size.height.dpAmount()?.let { node.setHeight(it) }
         FlexSizeKind.AUTO -> node.setHeightAuto()
         FlexSizeKind.UNDEFINED -> {}
     }
 
     when (minSize.width.kind) {
         FlexSizeKind.PERCENT -> minSize.width.amount?.let { node.setMinWidthPercent(it) }
-        FlexSizeKind.CONSTANT -> minSize.width.amount?.let { node.setMinWidth(it) }
+        FlexSizeKind.CONSTANT -> minSize.width.dpAmount()?.let { node.setMinWidth(it) }
         FlexSizeKind.AUTO -> {}
         FlexSizeKind.UNDEFINED -> {}
     }
 
     when (minSize.height.kind) {
         FlexSizeKind.PERCENT -> minSize.height.amount?.let { node.setMinHeightPercent(it) }
-        FlexSizeKind.CONSTANT -> minSize.height.amount?.let { node.setMinHeight(it) }
+        FlexSizeKind.CONSTANT -> minSize.height.dpAmount()?.let { node.setMinHeight(it) }
         FlexSizeKind.AUTO -> {}
         FlexSizeKind.UNDEFINED -> {}
     }
 
     when (maxSize.width.kind) {
         FlexSizeKind.PERCENT -> maxSize.width.amount?.let { node.setMaxWidthPercent(it) }
-        FlexSizeKind.CONSTANT -> maxSize.width.amount?.let { node.setMaxWidth(it) }
+        FlexSizeKind.CONSTANT -> maxSize.width.dpAmount()?.let { node.setMaxWidth(it) }
         FlexSizeKind.AUTO -> {}
         FlexSizeKind.UNDEFINED -> {}
     }
 
     when (maxSize.height.kind) {
         FlexSizeKind.PERCENT -> maxSize.height.amount?.let { node.setMaxHeightPercent(it) }
-        FlexSizeKind.CONSTANT -> maxSize.height.amount?.let { node.setMaxHeight(it) }
+        FlexSizeKind.CONSTANT -> maxSize.height.dpAmount()?.let { node.setMaxHeight(it) }
         FlexSizeKind.AUTO -> {}
         FlexSizeKind.UNDEFINED -> {}
     }

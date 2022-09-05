@@ -6,6 +6,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.MultiMeasureLayout
 import androidx.compose.ui.layout.layoutId
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.dp
 import com.facebook.yoga.YogaConstants
@@ -109,6 +110,7 @@ fun FlexRoot(
         padding,
         border
     )
+
     val rootLayoutContainer = remember {
         FlexLayoutContainer(
             YogaNodeFactory.create()
@@ -148,7 +150,7 @@ fun FlexRoot(
                 val placeable = allLayoutContainerMeasurables[index].measure(
                     Constraints(
                         maxWidth = if (suggestedWidth.isNaN()) Constraints.Infinity else suggestedWidth.toInt(),
-                        maxHeight = if (suggestedHeight.isNaN()) Constraints.Infinity else suggestedWidth.toInt()
+                        maxHeight = if (suggestedHeight.isNaN()) Constraints.Infinity else suggestedHeight.toInt()
                     )
                 )
 
@@ -210,7 +212,10 @@ fun FlexRoot(
 
         rootLayoutContainer.updateLayout()
 
-        layout(rootLayoutContainer.node.layoutWidth.toInt(), rootLayoutContainer.node.layoutHeight.toInt()) {
+        layout(
+            rootLayoutContainer.node.layoutWidth.toInt(),
+            rootLayoutContainer.node.layoutHeight.toInt()
+        ) {
             placeables.forEachIndexed { index, placeable ->
                 val node = layoutContainers[index].node
                 layoutContainers[index].updateLayout()
