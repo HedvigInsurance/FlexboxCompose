@@ -8,5 +8,8 @@ pluginManagement {
 
 rootProject.name = "FlexboxCompose"
 
-include(":samples")
+if (System.getenv()["JITPACK"] == null) {
+    include(":samples")
+}
+
 include(":flexboxcompose")
