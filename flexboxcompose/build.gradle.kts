@@ -5,10 +5,13 @@ plugins {
     kotlin("android")
     id("shot")
     id("maven-publish") apply true
+    id("com.palantir.git-version") version "0.15.0"
 }
 
+val gitVersion: groovy.lang.Closure<String> by extra
+
 group = "com.hedvig.flexboxcompose"
-version = "1.0-SNAPSHOT"
+version = gitVersion()
 
 android {
     compileSdk = 32
@@ -89,7 +92,7 @@ configure<PublishingExtension> {
         create<MavenPublication>("maven") {
             groupId = "com.hedvig.flexboxcompose"
             artifactId = "flexbox-compose"
-            version = "1.0.0"
+            version = gitVersion()
         }
     }
 
