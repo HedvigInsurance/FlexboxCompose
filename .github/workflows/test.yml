@@ -29,4 +29,4 @@ jobs:
       - name: Grant Permission for Gradlew to Execute
         run: chmod +x gradlew
       - name: Run tests
-        run: bash ./scripts/execute_screenshot_test.sh
+        run: bash ./scripts/execute_screenshot_tests.sh
