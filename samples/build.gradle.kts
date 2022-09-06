@@ -78,7 +78,5 @@ dependencies {
     }
 
     implementation("androidx.compose.material:material:1.2.0-rc02")
-    implementation("com.facebook.soloader:soloader:0.10.4")
-
     implementation(project(":flexboxcompose"))
 }

@@ -6,9 +6,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.MultiMeasureLayout
 import androidx.compose.ui.layout.layoutId
-import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.dp
+import com.facebook.soloader.SoLoader
 import com.facebook.yoga.*
 import java.lang.Integer.min
 
@@ -108,7 +109,10 @@ fun FlexRoot(
         border
     )
 
+    val context = LocalContext.current
+
     val rootLayoutContainer = remember {
+        SoLoader.init(context, false)
         FlexLayoutContainer(
             YogaNodeFactory.create()
         )

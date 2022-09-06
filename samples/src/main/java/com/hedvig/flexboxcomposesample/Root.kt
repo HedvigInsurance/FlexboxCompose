@@ -86,7 +86,10 @@ fun Root() {
                 flexGrow = 0f,
                 flexShrink = 1f,
                 modifier = Modifier.background(Color.Yellow),
-                padding = all(constant(16f))
+                padding = Edges(
+                    leading = constant(16f),
+                    bottom = constant(16f)
+                )
             ) {
                 Text(
                     "Hello",

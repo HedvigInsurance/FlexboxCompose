@@ -47,6 +47,12 @@ android {
     }
 
     namespace = "com.hedvig.flexboxcompose"
+
+    buildTypes {
+        getByName("release") {
+            isMinifyEnabled = false
+        }
+    }
 }
 
 object AndroidX {
@@ -73,6 +79,7 @@ dependencies {
         compileOnly(lifecycleViewmodelKtx)
     }
 
+    implementation("com.facebook.soloader:soloader:0.10.4")
     implementation("com.facebook.yoga:yoga:1.19.0")
     compileOnly("androidx.compose.foundation:foundation-layout:$composeVersion")
     compileOnly("androidx.compose.foundation:foundation:$composeVersion")
@@ -87,14 +94,16 @@ tasks.withType<KotlinCompile> {
     kotlinOptions.jvmTarget = "1.8"
 }
 
-configure<PublishingExtension> {
-    publications {
-        publishing {
-            create<MavenPublication>("release") {
-                groupId = "com.github.HedvigInsurance"
-                artifactId = "FlexboxCompose"
-                version = gitVersion()
-                artifact("$buildDir/outputs/aar/flexboxcompose-release.aar")
+afterEvaluate {
+    configure<PublishingExtension> {
+        publications {
+            publishing {
+                create<MavenPublication>("release") {
+                    groupId = "com.github.HedvigInsurance"
+                    artifactId = "FlexboxCompose"
+                    version = gitVersion()
+                    from(components["release"])
+                }
             }
         }
     }
