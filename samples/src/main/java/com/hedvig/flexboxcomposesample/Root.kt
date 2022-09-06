@@ -12,8 +12,6 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.dp
 import com.hedvig.flexboxcompose.*
 
 @Composable
@@ -47,7 +45,10 @@ fun Root() {
     Nunc ligula nisi, gravida ac aliquam quis, blandit at lacus. Nunc posuere, mauris eu viverra eleifend, neque eros pellentesque nibh, non imperdiet ante diam nec ante. Proin a lectus mollis, pellentesque nisl in, feugiat tortor. Nulla luctus facilisis ligula a venenatis. Nullam quis consectetur turpis. Phasellus id elementum nisi. Morbi quis purus porttitor, bibendum justo sit amet, cursus arcu. Nullam porttitor odio in quam suscipit, eget cursus magna egestas. Suspendisse sed sem eget nunc mattis maximus. Morbi interdum, purus id laoreet pharetra, enim lectus ornare lorem, id dignissim orci ipsum eget tellus.
     """
 
-    val height: Float by animateFloatAsState(if (modifySize) 100f else 50f, animationSpec = spring(dampingRatio = Spring.DampingRatioHighBouncy, stiffness = Spring.StiffnessLow))
+    val height: Float by animateFloatAsState(
+        if (modifySize) 100f else 50f,
+        animationSpec = spring(dampingRatio = Spring.DampingRatioHighBouncy, stiffness = Spring.StiffnessLow)
+    )
 
     var scrollState = rememberScrollState()
 
@@ -74,7 +75,8 @@ fun Root() {
             justifyContent = JustifyContent.SPACE_AROUND
         ) {
             FlexNode(
-                flexGrow = 0f,
+                flexGrow = 1f,
+                flexShrink = 0f,
                 modifier = Modifier.background(Color.Red),
                 padding = all(constant(0f))
             ) {
@@ -82,10 +84,16 @@ fun Root() {
             }
             FlexNode(
                 flexGrow = 0f,
-                modifier = Modifier.background(Color.Red),
+                flexShrink = 1f,
+                modifier = Modifier.background(Color.Yellow),
                 padding = all(constant(16f))
             ) {
-                Text("Hello", Modifier.background(Color.Cyan))
+                Text(
+                    "Hello",
+                    Modifier.background(Color.Cyan)
+                        .fillMaxWidth()
+                        .fillMaxHeight()
+                )
             }
         }
     }

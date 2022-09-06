@@ -2,12 +2,10 @@ package com.hedvig.flexboxcompose
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.layout.layoutId
-import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.layout.*
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.Constraints
 import com.facebook.yoga.YogaNodeFactory
 
 @Composable
@@ -108,13 +106,23 @@ fun FlexNode(
 
     style.applyTo(layoutContainer.node)
 
+    val density = LocalDensity.current.density.toInt()
+
     val paddingStart = layoutContainer.layout?.paddingStart?.let {
-        it / LocalDensity.current.density
-    }?.dp ?: 0.dp
+        it / density
+    }?.toInt() ?: 0
+
+    val paddingEnd = layoutContainer.layout?.paddingEnd?.let {
+        it / density
+    }?.toInt() ?: 0
 
     val paddingTop = layoutContainer.layout?.paddingTop?.let {
-        it / LocalDensity.current.density
-    }?.dp ?: 0.dp
+        it / density
+    }?.toInt() ?: 0
+
+    val paddingBottom = layoutContainer.layout?.paddingBottom?.let {
+        it / density
+    }?.toInt() ?: 0
 
     Column(
         modifier
@@ -124,7 +132,29 @@ fun FlexNode(
             }
     ) {
         Box(
-            modifier = Modifier.absoluteOffset(x = paddingStart, y = paddingTop)
+            modifier = Modifier.layout { measurable, constraints ->
+                if (constraints.hasBoundedHeight && constraints.hasBoundedWidth) {
+                    val placeable = measurable.measure(
+                        Constraints(
+                            maxWidth = constraints.maxWidth - paddingStart - paddingEnd,
+                            maxHeight = constraints.maxHeight - paddingTop - paddingBottom
+                        )
+                    )
+                    layout(placeable.width, placeable.height) {
+                        placeable.place(
+                            paddingStart,
+                            paddingTop
+                        )
+                    }
+                } else {
+                    val placeable = measurable.measure(
+                        constraints
+                    )
+                    layout(placeable.width, placeable.height) {
+                        placeable.place(0, 0)
+                    }
+                }
+            }
         ) {
             content()
         }
