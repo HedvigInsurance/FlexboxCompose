@@ -4,9 +4,9 @@ import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
 import androidx.compose.foundation.background
-import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Button
 import androidx.compose.material.Text
 import androidx.compose.runtime.*
@@ -40,86 +40,49 @@ fun Root() {
         mutableStateOf(false)
     }
 
-    val loremIpsum = """
-    Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vestibulum condimentum eu diam id facilisis. Integer tempus libero nec velit condimentum iaculis. Pellentesque aliquam quam suscipit urna tincidunt egestas. Fusce vitae justo eget est cursus fermentum eget ac turpis. Etiam ut est sed ante consequat aliquam. Etiam ac porta eros. Etiam placerat, mauris nec sagittis tempor, mi enim ornare dolor, in lobortis urna tortor id leo.
-
-    Nunc ligula nisi, gravida ac aliquam quis, blandit at lacus. Nunc posuere, mauris eu viverra eleifend, neque eros pellentesque nibh, non imperdiet ante diam nec ante. Proin a lectus mollis, pellentesque nisl in, feugiat tortor. Nulla luctus facilisis ligula a venenatis. Nullam quis consectetur turpis. Phasellus id elementum nisi. Morbi quis purus porttitor, bibendum justo sit amet, cursus arcu. Nullam porttitor odio in quam suscipit, eget cursus magna egestas. Suspendisse sed sem eget nunc mattis maximus. Morbi interdum, purus id laoreet pharetra, enim lectus ornare lorem, id dignissim orci ipsum eget tellus.
-    """
+    val loremIpsum =
+        "Lorem ipsum dolor sit amet, Integer tempus libero nec velit condimentum iaculis. lentesque nisl in, feugiat tortor. Nulla luctus facilisis ligula a venenatis. Nullam quis consectetur turpis. Phasellus id elementum nisi. Morbi quis purus porttitor, bibendum justo sit amet, cursus arcu. Nullam porttitor odio in quam suscipit, eget cursus magna egestas. Suspendisse sed sem eget nunc mattis maximus. Morbi interdum, purus id laoreet pharetra, enim lectus ornare lorem, id dignissim orci ipsum eget tellus."
 
     val height: Float by animateFloatAsState(
-        if (modifySize) 100f else 50f,
+        if (modifySize) 10f else 0f,
         animationSpec = spring(dampingRatio = Spring.DampingRatioHighBouncy, stiffness = Spring.StiffnessLow)
     )
 
     var scrollState = rememberScrollState()
 
-    Column(
-        modifier = Modifier.height(300.dp)
-    ) {
+    Column(modifier = Modifier.verticalScroll(scrollState)) {
         FlexRoot(
-            flexDirection = FlexDirection.ROW,
-            size = FlexSize(height = percent(height), width = percent(100f)),
-            modifier = Modifier.background(Color.Black),
-            justifyContent = JustifyContent.START,
-            padding = all(constant(5f))
+            flexDirection = FlexDirection.COLUMN,
+            flexibleAxies = listOf(Axis.VERTICAL),
+            modifier = Modifier.background(Color.Red),
+            justifyContent = JustifyContent.START
         ) {
-            FlexNode(
-                flexGrow = 1f,
-                flexShrink = 0f,
-                modifier = Modifier.background(Color.Red)
-            ) {
-                FlexRoot(
-                    flexibleAxies = listOf(Axis.HORIZONTAL, Axis.VERTICAL),
-                    flexDirection = FlexDirection.ROW,
-                    modifier = Modifier.background(Color.Cyan),
-                    size = FlexSize(height = auto(), width = auto()),
-                    flexGrow = 1f,
-                    flexShrink = 0f
-                ) {
-                    FlexNode(
-                        flexGrow = 1f,
-                        flexShrink = 0f
-                    ) {
-                        Text("Hello")
-                    }
-
-                    FlexNode(
-                        flexGrow = 1f,
-                        flexShrink = 0f
-                    ) {
-                        Button(onClick = {
-                            modifySize = !modifySize
-                        }) {
-                            Text("Hello")
-                        }
-                    }
+            FlexNode {
+                Button(onClick = {
+                    modifySize = !modifySize
+                }) {
+                    Text("Test")
                 }
             }
+
             FlexNode(
                 flexGrow = 0f,
                 flexShrink = 0f,
-                modifier = Modifier.background(Color.Yellow),
                 padding = Edges(
-                    constant(16f)
+                    leading = constant(80f),
+                    bottom = constant(20f),
+                    trailing = constant(80f),
+                    top = constant(if (modifySize) 20f else 0f)
                 )
             ) {
-                Text(
-                    "Hello",
-                    Modifier.background(Color.Cyan)
-                        .fillMaxHeight()
-                )
+                Text(loremIpsum, modifier = Modifier.padding(height.dp).background(Color.White))
             }
+
             FlexNode(
-                flexGrow = 0f,
-                flexShrink = 0f,
-                modifier = Modifier.background(Color.Yellow),
-                padding = all(constant(15f))
+                flexGrow = 1f,
+                flexShrink = 0f
             ) {
-                Text(
-                    "Hello",
-                    Modifier.background(Color.Cyan)
-                        .fillMaxHeight()
-                )
+                ExpandingContent()
             }
         }
     }

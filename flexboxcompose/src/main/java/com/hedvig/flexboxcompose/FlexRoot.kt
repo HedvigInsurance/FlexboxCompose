@@ -1,12 +1,9 @@
 package com.hedvig.flexboxcompose
 
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.padding
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.layout.MultiMeasureLayout
-import androidx.compose.ui.layout.layoutId
+import androidx.compose.ui.layout.*
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.Constraints
 import com.facebook.soloader.SoLoader
@@ -16,6 +13,10 @@ import kotlin.math.roundToInt
 
 enum class Axis {
     VERTICAL, HORIZONTAL
+}
+
+val LocalFlexRootForceRecomposition = compositionLocalOf<() -> Unit> {
+    error("Not in the context of a FlexRootForceRecomposition")
 }
 
 @Composable
@@ -120,109 +121,128 @@ fun FlexRoot(
     }
     style.applyTo(rootLayoutContainer.node)
 
-    Box(modifier = modifier) {
-        MultiMeasureLayout(
-            content = content,
-            modifier = Modifier.flexPadding(
-                rootLayoutContainer.layout
-            )
-        ) { measurables, constraints ->
-            val allLayoutContainerMeasurables = measurables.filter {
-                it.layoutId is FlexLayoutContainer
-            }
+    var compositionCount by remember {
+        mutableStateOf(0)
+    }
 
-            val layoutContainers = allLayoutContainerMeasurables.mapNotNull {
-                it.layoutId as? FlexLayoutContainer
-            }
+    CompositionLocalProvider(
+        LocalFlexRootForceRecomposition provides {
+            compositionCount += 1
+        }
+    ) {
+        Box(modifier = modifier) {
+            MultiMeasureLayout(
+                content = content,
+                modifier = Modifier.flexPadding(
+                    rootLayoutContainer.layout
+                )
+            ) { measurables, constraints ->
+                val newCompositionCount = compositionCount
 
-            if (rootLayoutContainer.node.childCount > layoutContainers.count()) {
-                val numberOfChildrenToRemove = rootLayoutContainer.node.childCount - layoutContainers.count()
-
-                for (i in 1..numberOfChildrenToRemove) {
-                    rootLayoutContainer.node.removeChildAt(
-                        rootLayoutContainer.node.childCount - 1
-                    )
+                val allLayoutContainerMeasurables = measurables.filter {
+                    it.layoutId is FlexLayoutContainer
                 }
-            }
 
-            layoutContainers.forEachIndexed { index, layoutContainer ->
-                layoutContainer.node.setMeasureFunction { _, suggestedWidth, widthMode, suggestedHeight, heightMode ->
-                    val placeable = allLayoutContainerMeasurables[index].measure(
-                        Constraints(
-                            maxWidth = if (suggestedWidth.isNaN()) Constraints.Infinity else suggestedWidth.roundToInt(),
-                            maxHeight = if (suggestedHeight.isNaN()) Constraints.Infinity else suggestedHeight.roundToInt()
+                val layoutContainers = allLayoutContainerMeasurables.mapNotNull {
+                    it.layoutId as? FlexLayoutContainer
+                }
+
+                if (rootLayoutContainer.node.childCount > layoutContainers.count()) {
+                    val numberOfChildrenToRemove = rootLayoutContainer.node.childCount - layoutContainers.count()
+
+                    for (i in 1..numberOfChildrenToRemove) {
+                        rootLayoutContainer.node.removeChildAt(
+                            rootLayoutContainer.node.childCount - 1
                         )
-                    )
-
-                    fun sanitize(
-                        constrainedSize: Float,
-                        measuredSize: Float,
-                        mode: YogaMeasureMode
-                    ): Float {
-                        return when (mode) {
-                            YogaMeasureMode.UNDEFINED -> measuredSize
-                            YogaMeasureMode.EXACTLY -> constrainedSize
-                            YogaMeasureMode.AT_MOST -> kotlin.math.min(measuredSize, constrainedSize)
-                        }
                     }
-                    return@setMeasureFunction YogaMeasureOutput.make(
-                        sanitize(suggestedWidth, placeable.width.toFloat(), widthMode),
-                        sanitize(suggestedHeight, placeable.height.toFloat(), heightMode)
-                    )
                 }
 
-                if (rootLayoutContainer.node.childCount >= index + 1) {
-                    if (rootLayoutContainer.node.getChildAt(index) != layoutContainer.node) {
-                        rootLayoutContainer.node.removeChildAt(index)
+                layoutContainers.forEachIndexed { index, layoutContainer ->
+                    layoutContainer.node.setMeasureFunction { _, suggestedWidth, widthMode, suggestedHeight, heightMode ->
+                        val measurable = allLayoutContainerMeasurables[index]
+                        measurable.applyPaddingMeasurePolicy().applyPadding = false
+
+                        val placeable = allLayoutContainerMeasurables[index].measure(
+                            Constraints(
+                                maxWidth = if (suggestedWidth.isNaN()) Constraints.Infinity
+                                else suggestedWidth.roundToInt(),
+                                maxHeight = if (suggestedHeight.isNaN()) Constraints.Infinity
+                                else suggestedHeight.roundToInt()
+                            )
+                        )
+
+                        fun sanitize(
+                            constrainedSize: Float,
+                            measuredSize: Float,
+                            mode: YogaMeasureMode
+                        ): Float {
+                            return when (mode) {
+                                YogaMeasureMode.UNDEFINED -> measuredSize
+                                YogaMeasureMode.EXACTLY -> constrainedSize
+                                YogaMeasureMode.AT_MOST -> kotlin.math.min(measuredSize, constrainedSize)
+                            }
+                        }
+                        return@setMeasureFunction YogaMeasureOutput.make(
+                            sanitize(suggestedWidth, placeable.width.toFloat(), widthMode),
+                            sanitize(suggestedHeight, placeable.height.toFloat(), heightMode)
+                        )
+                    }
+
+                    if (rootLayoutContainer.node.childCount >= index + 1) {
+                        if (rootLayoutContainer.node.getChildAt(index) != layoutContainer.node) {
+                            rootLayoutContainer.node.removeChildAt(index)
+                            rootLayoutContainer.node.addChildAt(layoutContainer.node, index)
+                        }
+                    } else {
                         rootLayoutContainer.node.addChildAt(layoutContainer.node, index)
                     }
-                } else {
-                    rootLayoutContainer.node.addChildAt(layoutContainer.node, index)
                 }
-            }
 
-            rootLayoutContainer.node.calculateLayout(
-                flexibleAxies.contains(Axis.HORIZONTAL).let {
-                    if (it) {
-                        YogaConstants.UNDEFINED
-                    } else {
-                        constraints.maxWidth.toFloat()
+                rootLayoutContainer.node.calculateLayout(
+                    flexibleAxies.contains(Axis.HORIZONTAL).let {
+                        if (it) {
+                            YogaConstants.UNDEFINED
+                        } else {
+                            constraints.maxWidth.toFloat()
+                        }
+                    },
+                    flexibleAxies.contains(Axis.VERTICAL).let {
+                        if (it) {
+                            YogaConstants.UNDEFINED
+                        } else {
+                            constraints.maxHeight.toFloat()
+                        }
                     }
-                },
-                flexibleAxies.contains(Axis.VERTICAL).let {
-                    if (it) {
-                        YogaConstants.UNDEFINED
-                    } else {
-                        constraints.maxHeight.toFloat()
-                    }
-                }
-            )
-
-            val placeables = allLayoutContainerMeasurables.mapIndexed { index, measurable ->
-                val node = layoutContainers[index].node
-
-                measurable.measure(
-                    Constraints.fixed(
-                        width = node.layoutWidth.roundToInt(),
-                        height = node.layoutHeight.roundToInt()
-                    )
                 )
-            }
 
-            rootLayoutContainer.updateLayout()
-
-            layout(
-                rootLayoutContainer.node.layoutWidth.roundToInt(),
-                rootLayoutContainer.node.layoutHeight.roundToInt()
-            ) {
-                placeables.forEachIndexed { index, placeable ->
+                val placeables = allLayoutContainerMeasurables.mapIndexed { index, measurable ->
                     val node = layoutContainers[index].node
-                    layoutContainers[index].updateLayout()
 
-                    placeable.place(
-                        x = node.layoutX.roundToInt(),
-                        y = node.layoutY.roundToInt()
+                    measurable.applyPaddingMeasurePolicy().applyPadding = true
+
+                    measurable.measure(
+                        Constraints.fixed(
+                            width = node.layoutWidth.roundToInt(),
+                            height = node.layoutHeight.roundToInt()
+                        )
                     )
+                }
+
+                rootLayoutContainer.updateLayout()
+
+                layout(
+                    rootLayoutContainer.node.layoutWidth.roundToInt(),
+                    rootLayoutContainer.node.layoutHeight.roundToInt()
+                ) {
+                    placeables.forEachIndexed { index, placeable ->
+                        val node = layoutContainers[index].node
+                        layoutContainers[index].updateLayout()
+
+                        placeable.place(
+                            x = node.layoutX.roundToInt(),
+                            y = node.layoutY.roundToInt()
+                        )
+                    }
                 }
             }
         }
