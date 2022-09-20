@@ -106,7 +106,7 @@ fun FlexNode(
     style.applyTo(layoutContainer.node)
 
     Box(
-        modifier
+        Modifier
             .layoutId(layoutContainer)
             .onSizeChanged {
                 layoutContainer.node.dirty()
@@ -115,12 +115,12 @@ fun FlexNode(
             )
     ) {
         Box(
-            modifier = Modifier.layout { measurable, constraints ->
+            modifier = modifier.layout { measurable, constraints ->
                 val placeable = measurable.measure(constraints)
                 layout(placeable.width, placeable.height) {
                     placeable.place(
-                        x = layoutContainer.layout?.paddingStart?.roundToInt() ?: 0,
-                        y = layoutContainer.layout?.paddingEnd?.roundToInt() ?: 0
+                        x = layoutContainer.layout.paddingStart.roundToInt(),
+                        y = layoutContainer.layout.paddingEnd.roundToInt()
                     )
                 }
             }
