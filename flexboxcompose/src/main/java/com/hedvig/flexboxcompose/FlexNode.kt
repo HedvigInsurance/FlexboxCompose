@@ -6,6 +6,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.*
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Constraints
+import androidx.compose.ui.unit.dp
 import com.facebook.yoga.YogaNodeFactory
 
 @Composable
@@ -106,23 +107,23 @@ fun FlexNode(
 
     style.applyTo(layoutContainer.node)
 
-    val density = LocalDensity.current.density.toInt()
+    val density = LocalDensity.current
 
-    val paddingStart = layoutContainer.layout?.paddingStart?.let {
-        it / density
-    }?.toInt() ?: 0
+    val paddingStart = with(density) {
+         layoutContainer.layout?.paddingStart?.toInt()?.toDp() ?: 0.dp
+    }
 
-    val paddingEnd = layoutContainer.layout?.paddingEnd?.let {
-        it / density
-    }?.toInt() ?: 0
+    val paddingEnd = with(density) {
+        layoutContainer.layout?.paddingEnd?.toInt()?.toDp() ?: 0.dp
+    }
 
-    val paddingTop = layoutContainer.layout?.paddingTop?.let {
-        it / density
-    }?.toInt() ?: 0
+    val paddingTop = with(density) {
+        layoutContainer.layout?.paddingTop?.toInt()?.toDp() ?: 0.dp
+    }
 
-    val paddingBottom = layoutContainer.layout?.paddingBottom?.let {
-        it / density
-    }?.toInt() ?: 0
+    val paddingBottom = with(density) {
+        layoutContainer.layout?.paddingTop?.toInt()?.toDp() ?: 0.dp
+    }
 
     Column(
         modifier
@@ -136,14 +137,14 @@ fun FlexNode(
                 if (constraints.hasBoundedHeight && constraints.hasBoundedWidth) {
                     val placeable = measurable.measure(
                         Constraints(
-                            maxWidth = constraints.maxWidth - paddingStart - paddingEnd,
-                            maxHeight = constraints.maxHeight - paddingTop - paddingBottom
+                            maxWidth = constraints.maxWidth - paddingStart.toPx().toInt() - paddingEnd.toPx().toInt(),
+                            maxHeight = constraints.maxHeight - paddingTop.toPx().toInt() - paddingBottom.toPx().toInt()
                         )
                     )
                     layout(placeable.width, placeable.height) {
                         placeable.place(
-                            paddingStart,
-                            paddingTop
+                            paddingStart.toPx().toInt(),
+                            paddingTop.toPx().toInt()
                         )
                     }
                 } else {
