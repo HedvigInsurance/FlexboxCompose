@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.*
+import androidx.compose.ui.unit.Constraints
 import com.facebook.yoga.YogaNodeFactory
 import kotlin.math.roundToInt
 
@@ -105,6 +106,8 @@ fun FlexNode(
 
     style.applyTo(layoutContainer.node)
 
+    val layout = layoutContainer.layout
+
     Box(
         Modifier
             .layoutId(layoutContainer)
@@ -115,17 +118,34 @@ fun FlexNode(
             )
     ) {
         Box(
-            modifier = modifier.layout { measurable, constraints ->
-                val placeable = measurable.measure(constraints)
-                layout(placeable.width, placeable.height) {
-                    placeable.place(
-                        x = layoutContainer.layout.paddingStart.roundToInt(),
-                        y = layoutContainer.layout.paddingEnd.roundToInt()
+            modifier = Modifier.layout { measurable, constraints ->
+                if (constraints.hasBoundedHeight && constraints.hasBoundedWidth) {
+                    val placeable = measurable.measure(
+                        Constraints(
+                            maxWidth = constraints.maxWidth - layout.paddingStart.roundToInt() - layout.paddingEnd.roundToInt(),
+                            maxHeight = constraints.maxHeight - layout.paddingTop.roundToInt() - layout.paddingBottom.roundToInt()
+                        )
                     )
+                    layout(placeable.width, placeable.height) {
+                        placeable.place(
+                            x = layout.paddingStart.roundToInt(),
+                            y = layout.paddingEnd.roundToInt()
+                        )
+                    }
+                } else {
+                    val placeable = measurable.measure(constraints)
+                    layout(placeable.width, placeable.height) {
+                        placeable.place(
+                            x = layout.paddingStart.roundToInt(),
+                            y = layout.paddingEnd.roundToInt()
+                        )
+                    }
                 }
             }
         ) {
-            content()
+            Box(modifier = modifier) {
+                content()
+            }
         }
     }
 }
