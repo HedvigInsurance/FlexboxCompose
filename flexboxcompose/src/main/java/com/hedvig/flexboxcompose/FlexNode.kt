@@ -4,10 +4,8 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.*
-import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.unit.Constraints
-import androidx.compose.ui.unit.dp
 import com.facebook.yoga.YogaNodeFactory
+import kotlin.math.roundToInt
 
 @Composable
 fun FlexNode(
@@ -107,53 +105,23 @@ fun FlexNode(
 
     style.applyTo(layoutContainer.node)
 
-    val density = LocalDensity.current
-
-    val paddingStart = with(density) {
-         layoutContainer.layout?.paddingStart?.toInt()?.toDp() ?: 0.dp
-    }
-
-    val paddingEnd = with(density) {
-        layoutContainer.layout?.paddingEnd?.toInt()?.toDp() ?: 0.dp
-    }
-
-    val paddingTop = with(density) {
-        layoutContainer.layout?.paddingTop?.toInt()?.toDp() ?: 0.dp
-    }
-
-    val paddingBottom = with(density) {
-        layoutContainer.layout?.paddingTop?.toInt()?.toDp() ?: 0.dp
-    }
-
-    Column(
+    Box(
         modifier
             .layoutId(layoutContainer)
             .onSizeChanged {
                 layoutContainer.node.dirty()
-            }
+            }.flexPadding(
+                layoutContainer.layout
+            )
     ) {
         Box(
             modifier = Modifier.layout { measurable, constraints ->
-                if (constraints.hasBoundedHeight && constraints.hasBoundedWidth) {
-                    val placeable = measurable.measure(
-                        Constraints(
-                            maxWidth = constraints.maxWidth - paddingStart.toPx().toInt() - paddingEnd.toPx().toInt(),
-                            maxHeight = constraints.maxHeight - paddingTop.toPx().toInt() - paddingBottom.toPx().toInt()
-                        )
+                val placeable = measurable.measure(constraints)
+                layout(placeable.width, placeable.height) {
+                    placeable.place(
+                        x = layoutContainer.layout?.paddingStart?.roundToInt() ?: 0,
+                        y = layoutContainer.layout?.paddingEnd?.roundToInt() ?: 0
                     )
-                    layout(placeable.width, placeable.height) {
-                        placeable.place(
-                            paddingStart.toPx().toInt(),
-                            paddingTop.toPx().toInt()
-                        )
-                    }
-                } else {
-                    val placeable = measurable.measure(
-                        constraints
-                    )
-                    layout(placeable.width, placeable.height) {
-                        placeable.place(0, 0)
-                    }
                 }
             }
         ) {

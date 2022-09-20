@@ -12,6 +12,7 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.dp
 import com.hedvig.flexboxcompose.*
 
 @Composable
@@ -52,49 +53,71 @@ fun Root() {
 
     var scrollState = rememberScrollState()
 
-    Column {
-        Box(modifier = Modifier.horizontalScroll(scrollState)) {
-            FlexRoot(
-                flexibleAxies = listOf(Axis.HORIZONTAL, Axis.VERTICAL),
-                flexDirection = FlexDirection.ROW,
-                modifier = Modifier.background(Color.Yellow)
-            ) {
-                FlexNode(
-                    flexGrow = 1f,
-                    modifier = Modifier.background(Color.Red)
-                ) {
-                    Text(loremIpsum)
-                }
-            }
-        }
-
+    Column(
+        modifier = Modifier.height(300.dp)
+    ) {
         FlexRoot(
-            flexibleAxies = listOf(Axis.VERTICAL),
             flexDirection = FlexDirection.ROW,
-            modifier = Modifier.background(Color.Yellow),
-            justifyContent = JustifyContent.SPACE_AROUND
+            size = FlexSize(height = percent(height), width = percent(100f)),
+            modifier = Modifier.background(Color.Black),
+            justifyContent = JustifyContent.START,
+            padding = all(constant(5f))
         ) {
             FlexNode(
                 flexGrow = 1f,
                 flexShrink = 0f,
-                modifier = Modifier.background(Color.Red),
-                padding = all(constant(0f))
+                modifier = Modifier.background(Color.Red)
             ) {
-                Text("Hello", Modifier.background(Color.Cyan))
+                FlexRoot(
+                    flexibleAxies = listOf(Axis.HORIZONTAL, Axis.VERTICAL),
+                    flexDirection = FlexDirection.ROW,
+                    modifier = Modifier.background(Color.Cyan),
+                    size = FlexSize(height = auto(), width = auto()),
+                    flexGrow = 1f,
+                    flexShrink = 0f
+                ) {
+                    FlexNode(
+                        flexGrow = 1f,
+                        flexShrink = 0f
+                    ) {
+                        Text("Hello")
+                    }
+
+                    FlexNode(
+                        flexGrow = 1f,
+                        flexShrink = 0f
+                    ) {
+                        Button(onClick = {
+                            modifySize = !modifySize
+                        }) {
+                            Text("Hello")
+                        }
+                    }
+                }
             }
             FlexNode(
                 flexGrow = 0f,
-                flexShrink = 1f,
+                flexShrink = 0f,
                 modifier = Modifier.background(Color.Yellow),
                 padding = Edges(
-                    leading = constant(16f),
-                    bottom = constant(16f)
+                    constant(16f)
                 )
             ) {
                 Text(
                     "Hello",
                     Modifier.background(Color.Cyan)
-                        .fillMaxWidth()
+                        .fillMaxHeight()
+                )
+            }
+            FlexNode(
+                flexGrow = 0f,
+                flexShrink = 0f,
+                modifier = Modifier.background(Color.Yellow),
+                padding = all(constant(15f))
+            ) {
+                Text(
+                    "Hello",
+                    Modifier.background(Color.Cyan)
                         .fillMaxHeight()
                 )
             }

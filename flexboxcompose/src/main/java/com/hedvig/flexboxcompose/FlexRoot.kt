@@ -1,5 +1,6 @@
 package com.hedvig.flexboxcompose
 
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
@@ -8,10 +9,10 @@ import androidx.compose.ui.layout.MultiMeasureLayout
 import androidx.compose.ui.layout.layoutId
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.Constraints
-import androidx.compose.ui.unit.dp
 import com.facebook.soloader.SoLoader
 import com.facebook.yoga.*
 import java.lang.Integer.min
+import kotlin.math.roundToInt
 
 enum class Axis {
     VERTICAL, HORIZONTAL
@@ -121,11 +122,8 @@ fun FlexRoot(
 
     MultiMeasureLayout(
         content = content,
-        modifier = modifier.padding(
-            start = rootLayoutContainer.layout?.paddingStart?.dp ?: 0.dp,
-            end = rootLayoutContainer.layout?.paddingEnd?.dp ?: 0.dp,
-            top = rootLayoutContainer.layout?.paddingTop?.dp ?: 0.dp,
-            bottom = rootLayoutContainer.layout?.paddingBottom?.dp ?: 0.dp
+        modifier = modifier.flexPadding(
+            rootLayoutContainer.layout
         )
     ) { measurables, constraints ->
         val allLayoutContainerMeasurables = measurables.filter {
@@ -150,26 +148,25 @@ fun FlexRoot(
             layoutContainer.node.setMeasureFunction { _, suggestedWidth, widthMode, suggestedHeight, heightMode ->
                 val placeable = allLayoutContainerMeasurables[index].measure(
                     Constraints(
-                        maxWidth = if (suggestedWidth.isNaN()) Constraints.Infinity else suggestedWidth.toInt(),
-                        maxHeight = if (suggestedHeight.isNaN()) Constraints.Infinity else suggestedHeight.toInt()
+                        maxWidth = if (suggestedWidth.isNaN()) Constraints.Infinity else suggestedWidth.roundToInt(),
+                        maxHeight = if (suggestedHeight.isNaN()) Constraints.Infinity else suggestedHeight.roundToInt()
                     )
                 )
 
                 fun sanitize(
-                    constrainedSize: Int,
-                    measuredSize: Int,
+                    constrainedSize: Float,
+                    measuredSize: Float,
                     mode: YogaMeasureMode
-                ): Int {
+                ): Float {
                     return when (mode) {
                         YogaMeasureMode.UNDEFINED -> measuredSize
                         YogaMeasureMode.EXACTLY -> constrainedSize
-                        YogaMeasureMode.AT_MOST -> min(measuredSize, constrainedSize)
+                        YogaMeasureMode.AT_MOST -> kotlin.math.min(measuredSize, constrainedSize)
                     }
                 }
-
                 return@setMeasureFunction YogaMeasureOutput.make(
-                    sanitize(suggestedWidth.toInt(), placeable.width, widthMode),
-                    sanitize(suggestedHeight.toInt(), placeable.height, heightMode)
+                    sanitize(suggestedWidth, placeable.width.toFloat(), widthMode),
+                    sanitize(suggestedHeight, placeable.height.toFloat(), heightMode)
                 )
             }
 
@@ -205,8 +202,8 @@ fun FlexRoot(
 
             measurable.measure(
                 Constraints.fixed(
-                    width = node.layoutWidth.toInt(),
-                    height = node.layoutHeight.toInt()
+                    width = node.layoutWidth.roundToInt(),
+                    height = node.layoutHeight.roundToInt()
                 )
             )
         }
@@ -214,16 +211,16 @@ fun FlexRoot(
         rootLayoutContainer.updateLayout()
 
         layout(
-            rootLayoutContainer.node.layoutWidth.toInt(),
-            rootLayoutContainer.node.layoutHeight.toInt()
+            rootLayoutContainer.node.layoutWidth.roundToInt(),
+            rootLayoutContainer.node.layoutHeight.roundToInt()
         ) {
             placeables.forEachIndexed { index, placeable ->
                 val node = layoutContainers[index].node
                 layoutContainers[index].updateLayout()
 
-                placeable.placeRelative(
-                    x = node.layoutX.toInt(),
-                    y = node.layoutY.toInt()
+                placeable.place(
+                    x = node.layoutX.roundToInt(),
+                    y = node.layoutY.roundToInt()
                 )
             }
         }
