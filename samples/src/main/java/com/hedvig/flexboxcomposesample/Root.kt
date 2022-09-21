@@ -13,6 +13,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.max
 import com.hedvig.flexboxcompose.*
 
 @Composable
@@ -65,6 +66,19 @@ fun Root() {
                 }
             }
 
+            FlexNode {
+                FlexRoot(
+                    flexDirection = FlexDirection.COLUMN,
+                    flexibleAxies = listOf(Axis.VERTICAL),
+                    modifier = Modifier.background(Color.Yellow),
+                    justifyContent = JustifyContent.START
+                ) {
+                    FlexNode(flexGrow = 0f) {
+                        Text("hello")
+                    }
+                }
+            }
+
             FlexNode(
                 flexGrow = 0f,
                 flexShrink = 0f,
@@ -75,7 +89,7 @@ fun Root() {
                     top = constant(if (modifySize) 20f else 0f)
                 )
             ) {
-                Text(loremIpsum, modifier = Modifier.padding(height.dp).background(Color.White))
+                Text(loremIpsum, modifier = Modifier.padding(max(height.dp, 0.dp)).background(Color.White))
             }
 
             FlexNode(

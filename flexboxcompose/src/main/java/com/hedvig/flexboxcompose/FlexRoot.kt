@@ -8,7 +8,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.Constraints
 import com.facebook.soloader.SoLoader
 import com.facebook.yoga.*
-import java.lang.Integer.min
 import kotlin.math.roundToInt
 
 enum class Axis {
@@ -159,8 +158,7 @@ fun FlexRoot(
 
                 layoutContainers.forEachIndexed { index, layoutContainer ->
                     layoutContainer.node.setMeasureFunction { _, suggestedWidth, widthMode, suggestedHeight, heightMode ->
-                        val measurable = allLayoutContainerMeasurables[index]
-                        measurable.applyPaddingMeasurePolicy().applyPadding = false
+                        layoutContainer.applyPaddingMeasurePolicy?.applyLayout = false
 
                         val placeable = allLayoutContainerMeasurables[index].measure(
                             Constraints(
@@ -217,8 +215,7 @@ fun FlexRoot(
 
                 val placeables = allLayoutContainerMeasurables.mapIndexed { index, measurable ->
                     val node = layoutContainers[index].node
-
-                    measurable.applyPaddingMeasurePolicy().applyPadding = true
+                    layoutContainers[index].applyPaddingMeasurePolicy?.applyLayout = true
 
                     measurable.measure(
                         Constraints.fixed(

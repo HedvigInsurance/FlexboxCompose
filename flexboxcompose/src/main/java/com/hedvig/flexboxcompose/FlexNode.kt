@@ -1,16 +1,19 @@
 package com.hedvig.flexboxcompose
 
-import androidx.compose.foundation.layout.*
-import androidx.compose.runtime.*
+import androidx.compose.foundation.layout.Box
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.layout.*
-import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.layout.Measurable
+import androidx.compose.ui.layout.MeasurePolicy
+import androidx.compose.ui.layout.MeasureScope
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.IntSize
 import com.facebook.yoga.YogaNodeFactory
 
-interface ApplyPaddingMeasurePolicy {
-    var applyPadding: Boolean
+interface ApplyLayoutMeasurePolicy {
+    var applyLayout: Boolean
 }
 
 @Composable
@@ -113,51 +116,60 @@ fun FlexNode(
 
     val layout = layoutContainer.layout
 
-    val density = LocalDensity.current
-
-    val paddingStart = with(density) {
-        layout.paddingStart.toDp()
-    }
-
-    val paddingEnd = with(density) {
-        layout.paddingEnd.toDp()
-    }
-
-    val paddingTop = with(density) {
-        layout.paddingTop.toDp()
-    }
-
-    val paddingBottom = with(density) {
-        layout.paddingBottom.toDp()
-    }
-
     val localFlexRootForceRecomposition = LocalFlexRootForceRecomposition.current
 
     var minimumIntrinsicSize: IntSize? by remember {
         mutableStateOf(null)
     }
 
+    val measurePolicy = object : MeasurePolicy, ApplyLayoutMeasurePolicy {
+        override var applyLayout = true
+
+        override fun MeasureScope.measure(measurables: List<Measurable>, constraints: Constraints): MeasureResult {
+            val measurable = measurables[0]
+
+            if (applyLayout) {
+                val placeable = measurable.measure(
+                    Constraints(
+                        maxWidth = layout.width.toInt() - layout.paddingStart.toInt() - layout.paddingEnd.toInt(),
+                        maxHeight = layout.height.toInt() - layout.paddingTop.toInt() - layout.paddingBottom.toInt()
+                    )
+                )
+                return layout(
+                    layout.width.toInt(),
+                    layout.height.toInt()
+                ) {
+                    placeable.place(
+                        layout.paddingStart.toInt(),
+                        layout.paddingTop.toInt()
+                    )
+                }
+            } else {
+                val placeable = measurable.measure(
+                    constraints
+                )
+
+                return layout(placeable.width, placeable.height) {
+                    placeable.place(0, 0)
+                }
+            }
+        }
+    }
+
+    layoutContainer.applyPaddingMeasurePolicy = measurePolicy
+
     Layout(
         content = {
             Box(
-                modifier = modifier.layout { measurable, constraints ->
-                    val placeable = measurable.measure(constraints)
-
-                    val minimumWidth = measurable.minIntrinsicWidth(0)
-                    val minimumHeight = measurable.minIntrinsicHeight(0)
-
-                    val minimumSize = IntSize(minimumWidth, minimumHeight)
-
+                modifier = modifier.onSizeChanged {
                     if (minimumIntrinsicSize == null) {
-                        minimumIntrinsicSize = minimumSize
-                    } else if (minimumSize != minimumIntrinsicSize) {
-                        layoutContainer.node.dirty()
-                        minimumIntrinsicSize = minimumSize
-                        localFlexRootForceRecomposition()
-                    }
-
-                    layout(placeable.width, placeable.height) {
-                        placeable.place(x = 0, y = 0)
+                        minimumIntrinsicSize = it
+                    } else {
+                        if (minimumIntrinsicSize != it) {
+                            minimumIntrinsicSize = it
+                            layoutContainer.node.dirty()
+                            localFlexRootForceRecomposition()
+                        }
                     }
                 }
             ) {
@@ -165,38 +177,6 @@ fun FlexNode(
             }
         },
         modifier = Modifier.layoutId(layoutContainer),
-        measurePolicy = object : MeasurePolicy, ApplyPaddingMeasurePolicy {
-            override var applyPadding = true
-
-            override fun MeasureScope.measure(measurables: List<Measurable>, constraints: Constraints): MeasureResult {
-                val measurable = measurables[0]
-
-                if (applyPadding) {
-                    val placeable = measurable.measure(
-                        Constraints(
-                            maxWidth = layout.width.toInt() - layout.paddingStart.toInt() - layout.paddingEnd.toInt(),
-                            maxHeight = layout.height.toInt() - layout.paddingTop.toInt() - layout.paddingBottom.toInt()
-                        )
-                    )
-                    return layout(
-                        layout.width.toInt(),
-                        layout.height.toInt()
-                    ) {
-                        placeable.place(
-                            paddingStart.toPx().toInt(),
-                            paddingTop.toPx().toInt()
-                        )
-                    }
-                } else {
-                    val placeable = measurable.measure(
-                        constraints
-                    )
-
-                    return layout(placeable.width, placeable.height) {
-                        placeable.place(0, 0)
-                    }
-                }
-            }
-        }
+        measurePolicy = measurePolicy
     )
 }

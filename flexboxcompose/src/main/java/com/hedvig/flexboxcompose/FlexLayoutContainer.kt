@@ -12,13 +12,14 @@ data class FlexLayout(
     val paddingTop: Float = 0f,
     val paddingBottom: Float = 0f,
     val width: Float = 0f,
-    val height: Float = 0f
+    val height: Float = 0f,
 )
 
 data class FlexLayoutContainer(
     val node: YogaNode
 ) {
     var layout: FlexLayout by mutableStateOf(FlexLayout())
+    var applyPaddingMeasurePolicy: ApplyLayoutMeasurePolicy? = null
 
     fun updateLayout() {
         layout = FlexLayout(
