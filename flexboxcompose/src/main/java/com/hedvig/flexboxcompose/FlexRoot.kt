@@ -3,7 +3,8 @@ package com.hedvig.flexboxcompose
 import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.layout.*
+import androidx.compose.ui.layout.MultiMeasureLayout
+import androidx.compose.ui.layout.layoutId
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.Constraints
 import com.facebook.soloader.SoLoader
@@ -131,10 +132,7 @@ fun FlexRoot(
     ) {
         Box(modifier = modifier) {
             MultiMeasureLayout(
-                content = content,
-                modifier = Modifier.flexPadding(
-                    rootLayoutContainer.layout
-                )
+                content = content
             ) { measurables, constraints ->
                 val newCompositionCount = compositionCount
 
