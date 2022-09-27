@@ -4,13 +4,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.*
-import androidx.compose.ui.unit.Constraints
-import androidx.compose.ui.unit.IntSize
 import com.facebook.yoga.YogaNodeFactory
-
-interface ApplyLayoutMeasurePolicy {
-    var applyLayout: Boolean
-}
 
 @Composable
 fun FlexNode(
@@ -102,77 +96,27 @@ fun FlexNode(
         border
     )
 
-    val layoutContainer = remember {
-        FlexLayoutContainer(
+    val nodeContainer = remember {
+        FlexNodeContainer(
             YogaNodeFactory.create()
         )
     }
 
-    style.applyTo(layoutContainer.node)
+    style.applyTo(nodeContainer.node)
 
-    val layout = layoutContainer.layout
+    Box(
+        modifier = Modifier.layoutId(nodeContainer).layout { measurable, constraints ->
+            val placeable = measurable.measure(constraints)
 
-    val localFlexRootForceRecomposition = LocalFlexRootForceRecomposition.current
+            nodeContainer.node.dirty()
 
-    var minimumIntrinsicSize: IntSize? by remember {
-        mutableStateOf(null)
-    }
-
-    val measurePolicy = object : MeasurePolicy, ApplyLayoutMeasurePolicy {
-        override var applyLayout = true
-
-        override fun MeasureScope.measure(measurables: List<Measurable>, constraints: Constraints): MeasureResult {
-            val measurable = measurables[0]
-
-            if (applyLayout) {
-                val placeable = measurable.measure(
-                    Constraints(
-                        maxWidth = layout.width.toInt() - layout.paddingStart.toInt() - layout.paddingEnd.toInt(),
-                        maxHeight = layout.height.toInt() - layout.paddingTop.toInt() - layout.paddingBottom.toInt()
-                    )
-                )
-                return layout(
-                    layout.width.toInt(),
-                    layout.height.toInt()
-                ) {
-                    placeable.place(
-                        layout.paddingStart.toInt(),
-                        layout.paddingTop.toInt()
-                    )
-                }
-            } else {
-                val placeable = measurable.measure(
-                    constraints
-                )
-
-                return layout(placeable.width, placeable.height) {
-                    placeable.place(0, 0)
-                }
+            layout(placeable.width, placeable.height) {
+                placeable.place(0, 0)
             }
         }
+    ) {
+        Box(modifier = modifier) {
+            content()
+        }
     }
-
-    layoutContainer.applyPaddingMeasurePolicy = measurePolicy
-
-    Layout(
-        content = {
-            Box(
-                modifier = modifier.onSizeChanged {
-                    if (minimumIntrinsicSize == null) {
-                        minimumIntrinsicSize = it
-                    } else {
-                        if (minimumIntrinsicSize != it) {
-                            minimumIntrinsicSize = it
-                            layoutContainer.node.dirty()
-                            localFlexRootForceRecomposition()
-                        }
-                    }
-                }
-            ) {
-                content()
-            }
-        },
-        modifier = Modifier.layoutId(layoutContainer),
-        measurePolicy = measurePolicy
-    )
 }
