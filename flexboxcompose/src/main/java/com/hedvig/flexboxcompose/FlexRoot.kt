@@ -177,8 +177,6 @@ fun FlexRoot(
                     } else {
                         rootNodeContainer.node.addChildAt(layoutContainer.node, index)
                     }
-
-                    layoutContainer.node.dirty()
                 }
 
                 rootNodeContainer.node.calculateLayout(
@@ -213,7 +211,7 @@ fun FlexRoot(
                         )
                     )
                 }
-                
+
                 return layout(
                     rootNodeContainer.node.layoutWidth.roundToInt(),
                     rootNodeContainer.node.layoutHeight.roundToInt()

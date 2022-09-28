@@ -17,12 +17,12 @@ import androidx.compose.ui.unit.max
 import com.hedvig.flexboxcompose.*
 
 @Composable
-fun ExpandingContent(modifier: Modifier) {
+fun ExpandingContent() {
     var isOpen by remember {
         mutableStateOf(false)
     }
 
-    Column(modifier = modifier) {
+    Column {
         Button(onClick = {
             isOpen = !isOpen
         }) {
@@ -58,21 +58,17 @@ fun Root() {
             modifier = Modifier.background(Color.Red),
             justifyContent = JustifyContent.START
         ) {
-            FlexNode { modifier ->
-                Button(
-                    onClick = {
-                        modifySize = !modifySize
-                    },
-                    modifier = modifier
-                ) {
+            FlexNode {
+                Button(onClick = {
+                    modifySize = !modifySize
+                }) {
                     Text("Test")
                 }
             }
 
-            FlexNode { modifier ->
+            FlexNode {
                 FlexRoot(
-                    flexibleAxies = listOf(Axis.VERTICAL),
-                    modifier = modifier
+                    flexibleAxies = listOf(Axis.VERTICAL)
                 ) {
                     FlexNode(
                         flexGrow = 0f,
@@ -83,8 +79,8 @@ fun Root() {
                             trailing = constant(80f),
                             top = constant(if (modifySize) 20f else 0f)
                         )
-                    ) { modifier ->
-                        Text(loremIpsum, modifier = modifier.padding(max(height.dp, 0.dp)).background(Color.White))
+                    ) {
+                        Text(loremIpsum, modifier = Modifier.padding(max(height.dp, 0.dp)).background(Color.White))
                     }
                 }
             }
@@ -92,15 +88,15 @@ fun Root() {
             FlexNode(
                 flexGrow = 1f,
                 flexShrink = 0f
-            ) { modifier ->
+            ) {
                 FlexRoot(
                     flexDirection = FlexDirection.COLUMN,
                     flexibleAxies = listOf(Axis.VERTICAL),
-                    modifier = modifier.background(Color.Yellow),
+                    modifier = Modifier.background(Color.Yellow),
                     justifyContent = JustifyContent.START
                 ) {
-                    FlexNode { modifier ->
-                        ExpandingContent(modifier)
+                    FlexNode {
+                        ExpandingContent()
                     }
                 }
             }
