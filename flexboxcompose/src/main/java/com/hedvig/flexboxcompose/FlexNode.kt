@@ -1,6 +1,9 @@
 package com.hedvig.flexboxcompose
 
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.*
@@ -71,7 +74,7 @@ fun FlexNode(
     // facebook/yoga implementation that mostly works as same as `padding`.
     border: Edges = Edges(),
 
-    content: @Composable () -> Unit = {}
+    content: @Composable (modifier: Modifier) -> Unit = {}
 ) {
     val style = FlexStyle(
         size,
@@ -104,19 +107,5 @@ fun FlexNode(
 
     style.applyTo(nodeContainer.node)
 
-    Box(
-        modifier = Modifier.layoutId(nodeContainer).layout { measurable, constraints ->
-            val placeable = measurable.measure(constraints)
-
-            nodeContainer.node.dirty()
-
-            layout(placeable.width, placeable.height) {
-                placeable.place(0, 0)
-            }
-        }
-    ) {
-        Box(modifier = modifier) {
-            content()
-        }
-    }
+    content(modifier.layoutId(nodeContainer))
 }

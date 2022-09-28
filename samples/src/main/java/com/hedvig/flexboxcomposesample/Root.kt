@@ -17,12 +17,12 @@ import androidx.compose.ui.unit.max
 import com.hedvig.flexboxcompose.*
 
 @Composable
-fun ExpandingContent() {
+fun ExpandingContent(modifier: Modifier) {
     var isOpen by remember {
         mutableStateOf(false)
     }
 
-    Column {
+    Column(modifier = modifier) {
         Button(onClick = {
             isOpen = !isOpen
         }) {
@@ -58,45 +58,51 @@ fun Root() {
             modifier = Modifier.background(Color.Red),
             justifyContent = JustifyContent.START
         ) {
-            FlexNode {
-                Button(onClick = {
-                    modifySize = !modifySize
-                }) {
+            FlexNode { modifier ->
+                Button(
+                    onClick = {
+                        modifySize = !modifySize
+                    },
+                    modifier = modifier
+                ) {
                     Text("Test")
                 }
             }
 
-            FlexNode {
+            FlexNode { modifier ->
                 FlexRoot(
-                    flexDirection = FlexDirection.COLUMN,
                     flexibleAxies = listOf(Axis.VERTICAL),
-                    modifier = Modifier.background(Color.Yellow),
-                    justifyContent = JustifyContent.START
+                    modifier = modifier
                 ) {
-                    FlexNode(flexGrow = 0f) {
-                        Text("hello")
+                    FlexNode(
+                        flexGrow = 0f,
+                        flexShrink = 0f,
+                        padding = Edges(
+                            leading = constant(80f),
+                            bottom = constant(20f),
+                            trailing = constant(80f),
+                            top = constant(if (modifySize) 20f else 0f)
+                        )
+                    ) { modifier ->
+                        Text(loremIpsum, modifier = modifier.padding(max(height.dp, 0.dp)).background(Color.White))
                     }
                 }
             }
 
             FlexNode(
-                flexGrow = 0f,
-                flexShrink = 0f,
-                padding = Edges(
-                    leading = constant(80f),
-                    bottom = constant(20f),
-                    trailing = constant(80f),
-                    top = constant(if (modifySize) 20f else 0f)
-                )
-            ) {
-                Text(loremIpsum, modifier = Modifier.padding(max(height.dp, 0.dp)).background(Color.White))
-            }
-
-            FlexNode(
                 flexGrow = 1f,
                 flexShrink = 0f
-            ) {
-                ExpandingContent()
+            ) { modifier ->
+                FlexRoot(
+                    flexDirection = FlexDirection.COLUMN,
+                    flexibleAxies = listOf(Axis.VERTICAL),
+                    modifier = modifier.background(Color.Yellow),
+                    justifyContent = JustifyContent.START
+                ) {
+                    FlexNode { modifier ->
+                        ExpandingContent(modifier)
+                    }
+                }
             }
         }
     }
