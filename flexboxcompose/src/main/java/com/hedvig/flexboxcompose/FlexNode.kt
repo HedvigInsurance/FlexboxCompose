@@ -106,7 +106,6 @@ fun FlexNode(
 
     Box(
         modifier.layoutId(nodeContainer).layout { measurable, constraints ->
-            println(nodeContainer.node)
             nodeContainer.node.dirty()
             val placeable = measurable.measure(constraints)
             layout(placeable.width, placeable.height) {

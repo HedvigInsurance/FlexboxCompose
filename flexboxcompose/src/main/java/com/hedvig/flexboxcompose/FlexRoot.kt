@@ -1,8 +1,9 @@
 package com.hedvig.flexboxcompose
 
 import androidx.compose.foundation.layout.IntrinsicSize
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.*
@@ -81,7 +82,7 @@ fun FlexRoot(
     // facebook/yoga implementation that mostly works as same as `padding`.
     border: Edges = Edges(),
 
-    flexibleAxies: List<Axis> = listOf(),
+    flexibleAxes: Set<Axis> = setOf(),
 
     content: @Composable () -> Unit
 ) {
@@ -120,7 +121,14 @@ fun FlexRoot(
 
     MultiMeasureLayout(
         content = content,
-        modifier = modifier.height(IntrinsicSize.Min),
+        modifier = modifier
+            .conditional(!flexibleAxes.contains(Axis.VERTICAL)) {
+                this.fillMaxHeight()
+            }
+            .conditional(!flexibleAxes.contains(Axis.HORIZONTAL)) {
+                this.fillMaxWidth()
+            }
+            .height(IntrinsicSize.Min),
         measurePolicy = object : MeasurePolicy {
             override fun MeasureScope.measure(measurables: List<Measurable>, constraints: Constraints): MeasureResult {
                 val allNodeContainerMeasurables = measurables.filter {
@@ -180,18 +188,26 @@ fun FlexRoot(
                 }
 
                 rootNodeContainer.node.calculateLayout(
-                    flexibleAxies.contains(Axis.HORIZONTAL).let {
+                    flexibleAxes.contains(Axis.HORIZONTAL).let {
                         if (it) {
                             YogaConstants.UNDEFINED
                         } else {
-                            constraints.maxWidth.toFloat()
+                            if (constraints.hasBoundedWidth) {
+                                constraints.maxWidth.toFloat()
+                            } else {
+                                YogaConstants.UNDEFINED
+                            }
                         }
                     },
-                    flexibleAxies.contains(Axis.VERTICAL).let {
+                    flexibleAxes.contains(Axis.VERTICAL).let {
                         if (it) {
                             YogaConstants.UNDEFINED
                         } else {
-                            constraints.maxHeight.toFloat()
+                            if (constraints.hasBoundedHeight) {
+                                constraints.maxHeight.toFloat()
+                            } else {
+                                YogaConstants.UNDEFINED
+                            }
                         }
                     }
                 )
